@@ -32,7 +32,7 @@ httpx==0.28.1
 idna==3.10
 img2pdf==0.6.1
 inflection==0.5.1
-iniconfig==2.0.0
+iniconfig==2.3.0
 Jinja2==3.1.6
 jiter==0.10.0
 jmespath==1.0.1
