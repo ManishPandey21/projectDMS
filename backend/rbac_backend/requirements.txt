@@ -93,7 +93,7 @@ langchain-text-splitters==0.3.11
 langgraph==0.2.26
 langchain-openai==0.2.8
 langchain-qdrant==0.2.0
-qdrant-client==1.11.0
+qdrant-client==1.18.0
 llama-index-core==0.14.22
 llama-index-embeddings-openai==0.6.0
 llama-index-vector-stores-mongodb==0.10.1
