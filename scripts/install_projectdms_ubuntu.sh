@@ -139,7 +139,36 @@ run_remote() {
     remote_env+=("PUBLIC_BASE_URL=$(shell_quote "$PUBLIC_BASE_URL")")
   fi
 
-  warn "For private GitHub access, run with GITHUB_TOKEN already exported on the server or pass it in the SSH session intentionally."
+  if [[ -n "$ENV_SOURCE_FILE" ]]; then
+    [[ -f "$ENV_SOURCE_FILE" ]] || die "ENV_SOURCE_FILE not found: $ENV_SOURCE_FILE"
+    scp "$ENV_SOURCE_FILE" "$REMOTE_TARGET:/tmp/projectdms.env"
+    remote_env+=("ENV_SOURCE_FILE=/tmp/projectdms.env")
+  fi
+
+  local forwarded_secret_names=(
+    GITHUB_TOKEN
+    OPENAI_API_KEY
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_BUCKET_NAME
+    AWS_REGION
+    SMTP_HOST
+    SMTP_PORT
+    SMTP_USERNAME
+    SMTP_PASSWORD
+    SMTP_FROM_EMAIL
+    SMTP_SETTINGS_ENCRYPTION_KEY
+  )
+  local secret_name
+  for secret_name in "${forwarded_secret_names[@]}"; do
+    if [[ -n "${!secret_name:-}" ]]; then
+      remote_env+=("${secret_name}=$(shell_quote "${!secret_name}")")
+    fi
+  done
+
+  if [[ "$REPO_URL" == https://github.com/* && -z "${GITHUB_TOKEN:-}" ]]; then
+    warn "GITHUB_TOKEN is not set locally. The remote clone will only work if the VPS already has GitHub credentials."
+  fi
   log "Starting remote installation"
   ssh -t "$REMOTE_TARGET" "sudo env ${remote_env[*]} bash /tmp/install_projectdms_ubuntu.sh --server"
 }
