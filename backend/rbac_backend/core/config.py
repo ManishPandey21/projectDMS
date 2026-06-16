@@ -222,6 +222,14 @@ class Settings(BaseSettings):
         validation_alias="CONTACT_RECIPIENT_EMAIL",
     )
     
+    # Payment gateway configuration
+    PAYMENT_PROVIDER: str = Field(default="noop", validation_alias="PAYMENT_PROVIDER")
+    RAZORPAY_KEY_ID: str = Field(default="", validation_alias="RAZORPAY_KEY_ID")
+    RAZORPAY_KEY_SECRET: str = Field(default="", validation_alias="RAZORPAY_KEY_SECRET")
+    RAZORPAY_WEBHOOK_SECRET: str = Field(default="", validation_alias="RAZORPAY_WEBHOOK_SECRET")
+    STRIPE_API_KEY: str = Field(default="", validation_alias="STRIPE_API_KEY")
+    STRIPE_WEBHOOK_SECRET: str = Field(default="", validation_alias="STRIPE_WEBHOOK_SECRET")
+
     # Rate Limiting Configuration
     USER_RATE_LIMIT_REQUESTS: int = Field(default=10, description="Max requests per user per minute")
     USER_RATE_LIMIT_WINDOW: int = Field(default=60, description="Rate limit window in seconds")
@@ -435,6 +443,13 @@ class Settings(BaseSettings):
                 production_errors.append("METRICS_TOKEN is required when METRICS_ENABLED=true in production")
             if self.ANTIVIRUS_ENABLED and self.CLAMAV_FAIL_OPEN:
                 production_errors.append("CLAMAV_FAIL_OPEN must be false in production antivirus environments")
+            if getattr(self, "OBSERVABILITY_STORE_RAW_QUERIES", False):
+                # M10: raw RAG/search queries can contain sensitive contract/claim
+                # content. Redaction is the default; forbid opting back into raw
+                # storage in production so it can't be enabled by accident.
+                production_errors.append(
+                    "OBSERVABILITY_STORE_RAW_QUERIES must be false in production (raw queries may contain sensitive content)"
+                )
             if production_errors:
                 raise ValueError(
                     "Invalid production configuration: " + "; ".join(production_errors)
