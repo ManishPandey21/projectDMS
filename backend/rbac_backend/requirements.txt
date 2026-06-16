@@ -51,7 +51,7 @@ packaging==24.2
 passlib==1.7.4
 pdfminer.six==20250506
 pdfplumber==0.11.7
-pi_heif==1.1.0
+pi_heif==1.4.0
 pikepdf==9.10.2
 pillow==11.3.0
 pluggy==1.5.0
